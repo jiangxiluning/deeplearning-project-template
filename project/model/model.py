@@ -4,13 +4,14 @@ import torch
 import pytorch_lightning as pl
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, random_split
+from easydict import EasyDict
 
 from torchvision.datasets.mnist import MNIST
 from torchvision import transforms
 
 
 class LitClassifier(pl.LightningModule):
-    def __init__(self, hidden_dim=128, learning_rate=1e-3):
+    def __init__(self, config: EasyDict):
         super().__init__()
         self.save_hyperparameters()
 
