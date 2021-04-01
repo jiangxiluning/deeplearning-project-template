@@ -9,11 +9,13 @@ from torchvision.datasets.mnist import MNIST
 from torchvision import transforms
 
 
-class Backbone(torch.nn.Module):
-    def __init__(self, hidden_dim=128):
+class LitClassifier(pl.LightningModule):
+    def __init__(self, hidden_dim=128, learning_rate=1e-3):
         super().__init__()
-        self.l1 = torch.nn.Linear(28 * 28, hidden_dim)
-        self.l2 = torch.nn.Linear(hidden_dim, 10)
+        self.save_hyperparameters()
+
+        self.l1 = torch.nn.Linear(28 * 28, self.hparams.hidden_dim)
+        self.l2 = torch.nn.Linear(self.hparams.hidden_dim, 10)
 
     def forward(self, x):
         x = x.view(x.size(0), -1)
@@ -21,44 +23,31 @@ class Backbone(torch.nn.Module):
         x = torch.relu(self.l2(x))
         return x
 
-
-class LitClassifier(pl.LightningModule):
-    def __init__(self, backbone, learning_rate=1e-3):
-        super().__init__()
-        self.save_hyperparameters()
-        self.backbone = backbone
-
-    def forward(self, x):
-        # use forward for inference/predictions
-        embedding = self.backbone(x)
-        return embedding
-
     def training_step(self, batch, batch_idx):
         x, y = batch
-        y_hat = self.backbone(x)
+        y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
-        self.log('train_loss', loss, on_epoch=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
-        y_hat = self.backbone(x)
+        y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
-        self.log('valid_loss', loss, on_step=True)
+        self.log('valid_loss', loss)
 
     def test_step(self, batch, batch_idx):
         x, y = batch
-        y_hat = self.backbone(x)
+        y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
         self.log('test_loss', loss)
 
     def configure_optimizers(self):
-        # self.hparams available because we called self.save_hyperparameters()
         return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
 
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
+        parser.add_argument('--hidden_dim', type=int, default=128)
         parser.add_argument('--learning_rate', type=float, default=0.0001)
         return parser
 
@@ -71,7 +60,6 @@ def cli_main():
     # ------------
     parser = ArgumentParser()
     parser.add_argument('--batch_size', default=32, type=int)
-    parser.add_argument('--hidden_dim', type=int, default=128)
     parser = pl.Trainer.add_argparse_args(parser)
     parser = LitClassifier.add_model_specific_args(parser)
     args = parser.parse_args()
@@ -90,7 +78,7 @@ def cli_main():
     # ------------
     # model
     # ------------
-    model = LitClassifier(Backbone(hidden_dim=args.hidden_dim), args.learning_rate)
+    model = LitClassifier(args.hidden_dim, args.learning_rate)
 
     # ------------
     # training
@@ -101,8 +89,7 @@ def cli_main():
     # ------------
     # testing
     # ------------
-    result = trainer.test(test_dataloaders=test_loader)
-    print(result)
+    trainer.test(test_dataloaders=test_loader)
 
 
 if __name__ == '__main__':

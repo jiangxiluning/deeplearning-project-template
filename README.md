@@ -67,7 +67,7 @@ from pytorch_lightning import Trainer
 # model
 model = LitClassifier()
 
-# data
+# data_module
 train, val, test = mnist()
 
 # train

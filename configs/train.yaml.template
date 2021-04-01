@@ -1,0 +1,87 @@
+system:
+  model_name: MNISTModel
+  run_name: demo_run
+  log_interval: 5
+  output: "exps"
+  desc: "it's a demo."
+  seed: 1234
+
+
+model:
+  sync_bn: True
+
+  embedder:
+    name: "embedding"
+    args:
+      embedding_dim: 512
+
+  encoder:
+    name: "LSTM"
+    args:
+      hidden_size: 512
+      bidirectional: True
+
+  decoder:
+    name: "MLPDecoder"
+    args: {}
+
+  output_layer:
+    name: "CRFOutputLayer"
+    args: {}
+
+
+  structurer:
+    name: "PassThoughStructurer"
+    args: {}
+
+train:
+  epochs: 300
+
+
+  optim:
+    name: Adam
+    args:
+      lr: 0.001
+
+  lr_scheduler:
+    name: ''
+    args: ''
+
+  checkpoints:
+    name: "InfoExtractor"
+    monitor_start: 0.5
+
+val:
+  batch_size: 8
+  loader_workers: 2
+  interval: 1
+  interval_iter: 0
+
+test:
+  batch_size: 8
+  loader_workers: 2
+
+data:
+  train:
+    batch_size: 128
+    num_workers: 8
+    pin_memory: False
+    datasets:
+      - "xxx"
+
+  val:
+    batch_size: 128
+    num_workers: 8
+    pin_memory: False
+    datasets:
+      val1: "xxx"
+      val2: "xxx"
+
+
+  test:
+    batch_size: 128
+    num_workers: 8
+    pin_memory: False
+    datasets:
+      test1: "xxx"
+      test1: "xxx"

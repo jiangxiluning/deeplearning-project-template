@@ -56,7 +56,7 @@ def cli_main():
     args = parser.parse_args()
 
     # ------------
-    # data
+    # data_module
     # ------------
     dataset = MNIST('', train=True, download=True, transform=transforms.ToTensor())
     mnist_test = MNIST('', train=False, download=True, transform=transforms.ToTensor())
