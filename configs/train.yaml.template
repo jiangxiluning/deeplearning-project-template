@@ -33,16 +33,23 @@ model:
 
 trainer:
 
-  epochs: 300
-  log_interval: 5
+  max_epochs: 300
   output_dir: "exps"
   desc: "it's a demo."
   seed: 1234
   gpus: [0]
   log_gpu_memory: 'all'
+  val_check_interval: 1.0
+  check_val_every_n_epoch: 1
+  num_nodes: 1
+  log_every_n_steps: 5
+  precision: 32,
+  flush_logs_every_n_steps: 100
+  benchmark: True
+  deterministic: False
 
   loggers:
-     tensorboard: True
+     tensorboard: False
      wandb: True
 
   optim:
@@ -55,8 +62,7 @@ trainer:
     args: ''
 
   checkpoints:
-    name: "InfoExtractor"
-    monitor
+    period: 1
 
 data:
   train:
