@@ -1,8 +1,7 @@
 ### Deep learning project seed
 Use this seed to start new deep learning / ML projects.
 
-- Built in setup.py
-- Built in requirements
+- using poetry to manage env stuffs
 - Examples with MNIST
 - Badges
 - Bibtex
@@ -45,37 +44,23 @@ git clone https://github.com/YourGithubName/deep-learning-project-template
 
 # install project   
 cd deep-learning-project-template 
-pip install -e .   
-pip install -r requirements.txt
- ```   
+poetry install
+ ```
+It is highly recommended using poetry to manage python env, for usage, please refer to https://python-poetry.org/.
+
  Next, navigate to any file and run it.   
  ```bash
-# module folder
-cd project
+# spawn your env's shell 
+poetry shell
 
-# run module (example: mnist as your main contribution)   
-python lit_classifier_main.py    
-```
+mv configs/train.yaml.template configs/train.yaml
+vi configs/train.yaml # do some modification
 
-## Imports
-This project is setup as a package which means you can now easily import any file into any other file like so:
-```python
-from project.datasets.mnist import mnist
-from project.lit_classifier_main import LitClassifier
-from pytorch_lightning import Trainer
+# run training
+python main.py train configs/train.yaml.template
 
-# model
-model = LitClassifier()
-
-# data_module
-train, val, test = mnist()
-
-# train
-trainer = Trainer()
-trainer.fit(model, train, val)
-
-# test using the best model!
-trainer.test(test_dataloaders=test)
+# run testing
+python main.py test configs/train.yaml {your_ckpt_path} {your_hparams_path}
 ```
 
 ### Citation   

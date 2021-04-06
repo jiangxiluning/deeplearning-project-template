@@ -34,14 +34,14 @@ class MNISTDataModule(pl.LightningDataModule):
                           batch_size=self.config.data.val.batch_size,
                           num_workers=self.config.data.val.num_workers,
                           pin_memory=self.config.data.val.pin_memory,
-                          shuffle=True)
+                          shuffle=False)
 
     def test_dataloader(self) -> Union[DataLoader, List[DataLoader]]:
         return DataLoader(dataset=self.mnist_test,
                           batch_size=self.config.data.test.batch_size,
                           num_workers=self.config.data.test.num_workers,
                           pin_memory=self.config.data.test.pin_memory,
-                          shuffle=True)
+                          shuffle=False)
 
 
 

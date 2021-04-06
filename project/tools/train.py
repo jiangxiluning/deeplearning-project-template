@@ -5,9 +5,10 @@ from easydict import EasyDict
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import wandb, tensorboard
 
-from  ..model.model import LitClassifier
-from  ..data_module.data_modules import MNISTDataModule
+from ..model.model import LitClassifier
+from ..data_module.data_modules import MNISTDataModule
 from .utils import get_valid_arguments
+
 
 def train(config: EasyDict,
           command_opts: Optional[dict] = None):
@@ -36,35 +37,36 @@ def train(config: EasyDict,
                         precision=config.trainer.precision,
                         flush_logs_every_n_steps=config.trainer.flush_logs_every_n_steps,
                         benchmark=config.trainer.benchmark,
-                        deterministic=config.trainer.deterministic)
+                        deterministic=config.trainer.deterministic,
+                        accelerator=config.trainer.accelerator
+                        )
 
-    print(command_opts)
     additional_args = get_valid_arguments(pl.Trainer, command_opts)
-    print(additional_args)
     default_args.update(additional_args)
-    print(default_args)
 
     loggers = []
     if config.trainer.loggers.wandb:
-        wandb_logger = wandb.WandbLogger(project=config.system.model_name ,
+        wandb_logger = wandb.WandbLogger(project=config.system.model_name,
                                          name=config.system.run_name,
                                          offline=True,
                                          save_dir=pathlib.Path(config.trainer.output_dir) / 'wandb',
                                          config=config)
 
-
         loggers.append(wandb_logger)
 
     if config.trainer.loggers.tensorboard:
-        tfb_logger = tensorboard.TensorBoardLogger(save_dir=pathlib.Path(config.trainer.output_dir)/ 'tensorboard',
-                                                   name=config.system.run_name)
+        tfb_logger = tensorboard.TensorBoardLogger(save_dir=pathlib.Path(config.trainer.output_dir),
+                                                   name=config.system.model_name,
+                                                   version=config.system.run_name)
         loggers.append(tfb_logger)
 
-    checkpoint_cb = pl.callbacks.ModelCheckpoint(filename=config.system.model_name + '_' +
-                                                 config.system.run_name,
-                                                 period=config.trainer.checkpoints.period)
+    checkpoint_cb = pl.callbacks.ModelCheckpoint(filename=config.system.model_name + '_' + config.system.run_name,
+                                                 period=config.trainer.checkpoints.period,
+                                                 dirpath=pathlib.Path(config.trainer.output_dir)
+                                                         / config.system.model_name
+                                                         / config.system.run_name)
 
-    trainer = pl.Trainer(logger=loggers,
-                         callbacks=[checkpoint_cb],
-                         **default_args)
+    default_args['logger'] = loggers
+    default_args['callbacks'] = [checkpoint_cb]
+    trainer = pl.Trainer(**default_args)
     trainer.fit(model, train_loader, val_loader)

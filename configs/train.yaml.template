@@ -24,6 +24,7 @@ trainer:
   flush_logs_every_n_steps: 100
   benchmark: True
   deterministic: False
+  accelerator: "ddp"
 
   loggers:
      tensorboard: True
@@ -44,14 +45,14 @@ trainer:
 data:
   train:
     batch_size: 128
-    num_workers: 8
+    num_workers: 2
     pin_memory: False
     datasets:
       - "xxx"
 
   val:
     batch_size: 128
-    num_workers: 8
+    num_workers: 2
     pin_memory: False
     datasets:
       val1: "xxx"
@@ -60,7 +61,7 @@ data:
 
   test:
     batch_size: 128
-    num_workers: 8
+    num_workers: 2
     pin_memory: False
     datasets:
       test1: "xxx"
