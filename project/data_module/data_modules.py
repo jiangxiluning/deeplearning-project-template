@@ -16,28 +16,31 @@ class MNISTDataModule(pl.LightningDataModule):
 
     def setup(self, stage: Optional[str] = None):
         dataset = MNIST('', train=True, download=True, transform=transforms.ToTensor())
-        self.mnist_test = MNIST('', train=False, download=True, transform=transforms.ToTensor())
-        self.mnist_train, self.mnist_val = random_split(dataset, [55000, 5000])
+        if stage == 'test':
+            self.mnist_test = MNIST('', train=False, download=True, transform=transforms.ToTensor())
+
+        if stage == 'train':
+            self.mnist_train, self.mnist_val = random_split(dataset, [55000, 5000])
 
     def train_dataloader(self) -> Any:
         return DataLoader(dataset=self.mnist_train,
-                          batch_size=self.data.train.batch_size,
-                          num_workers=self.data.train.num_workers,
-                          pin_memory=self.data.train.pin_memory,
+                          batch_size=self.config.data.train.batch_size,
+                          num_workers=self.config.data.train.num_workers,
+                          pin_memory=self.config.data.train.pin_memory,
                           shuffle=True)
 
     def val_dataloader(self) -> Union[DataLoader, List[DataLoader]]:
-        return DataLoader(dataset=self.mnist_train,
-                          batch_size=self.data.val.batch_size,
-                          num_workers=self.data.val.num_workers,
-                          pin_memory=self.data.val.pin_memory,
+        return DataLoader(dataset=self.mnist_val,
+                          batch_size=self.config.data.val.batch_size,
+                          num_workers=self.config.data.val.num_workers,
+                          pin_memory=self.config.data.val.pin_memory,
                           shuffle=True)
 
     def test_dataloader(self) -> Union[DataLoader, List[DataLoader]]:
-        return DataLoader(dataset=self.mnist_train,
-                          batch_size=self.data.test.batch_size,
-                          num_workers=self.data.test.num_workers,
-                          pin_memory=self.data.test.pin_memory,
+        return DataLoader(dataset=self.mnist_test,
+                          batch_size=self.config.data.test.batch_size,
+                          num_workers=self.config.data.test.num_workers,
+                          pin_memory=self.config.data.test.pin_memory,
                           shuffle=True)
 
 

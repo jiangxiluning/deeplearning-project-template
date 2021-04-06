@@ -1,18 +1,34 @@
-from typing import List, Dict, Optional
-from pathlib import Path
+import argparse
+import pathlib
 
-import typer
+from pytorch_lightning import Trainer
+import anyconfig
+import easydict
 
+from project.tools.utils import add_argparse_args
 from project.tools.train import train as _train
 
-app = typer.Typer()
 
-@app.command(name='train')
-def train(config: Path = typer.Argument(exists=True),
-          command_opts: Optional[List[str]] = typer.Option(None)):
-    typer.echo(config)
-    typer.echo(command_opts)
+
+def train(args: argparse.Namespace):
+    config = anyconfig.load(args.config, ac_parser='yaml')
+    config = easydict.EasyDict(config)
+
+    command_opts = vars(args)
+    _train(config=config,
+           command_opts=command_opts)
+
 
 
 if __name__ == '__main__':
-    app()
+    parser = argparse.ArgumentParser(prog='main')
+
+    sub_parsers = parser.add_subparsers(dest='name')
+    train_parser = sub_parsers.add_parser(name='train', description='training utility')
+    train_parser.add_argument('config',
+                              help='config file')
+    train_parser = add_argparse_args(Trainer, train_parser)
+    train_parser.set_defaults(func=train)
+
+    args = parser.parse_args()
+    args.func(args)

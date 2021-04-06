@@ -15,8 +15,8 @@ class LitClassifier(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        self.l1 = torch.nn.Linear(28 * 28, self.hparams.hidden_dim)
-        self.l2 = torch.nn.Linear(self.hparams.hidden_dim, 10)
+        self.l1 = torch.nn.Linear(28 * 28, self.hparams.config.model.hidden_dim)
+        self.l2 = torch.nn.Linear(self.hparams.config.model.hidden_dim, 10)
 
     def forward(self, x):
         x = x.view(x.size(0), -1)
@@ -43,14 +43,8 @@ class LitClassifier(pl.LightningModule):
         self.log('test_loss', loss)
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
-
-    @staticmethod
-    def add_model_specific_args(parent_parser):
-        parser = ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument('--hidden_dim', type=int, default=128)
-        parser.add_argument('--learning_rate', type=float, default=0.0001)
-        return parser
+        if self.hparams.config.trainer.optim.name == 'Adam':
+            return torch.optim.Adam(self.parameters(), **self.hparams.config.trainer.optim.args)
 
 
 def cli_main():

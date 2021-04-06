@@ -6,30 +6,7 @@ system:
 
 model:
   sync_bn: True
-
-  embedder:
-    name: "embedding"
-    args:
-      embedding_dim: 512
-
-  encoder:
-    name: "LSTM"
-    args:
-      hidden_size: 512
-      bidirectional: True
-
-  decoder:
-    name: "MLPDecoder"
-    args: {}
-
-  output_layer:
-    name: "CRFOutputLayer"
-    args: {}
-
-
-  structurer:
-    name: "PassThoughStructurer"
-    args: {}
+  hidden_dim: 128
 
 trainer:
 
@@ -43,14 +20,14 @@ trainer:
   check_val_every_n_epoch: 1
   num_nodes: 1
   log_every_n_steps: 5
-  precision: 32,
+  precision: 32
   flush_logs_every_n_steps: 100
   benchmark: True
   deterministic: False
 
   loggers:
-     tensorboard: False
-     wandb: True
+     tensorboard: True
+     wandb: False
 
   optim:
     name: Adam
