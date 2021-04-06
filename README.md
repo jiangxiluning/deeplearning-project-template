@@ -59,8 +59,8 @@ vi configs/train.yaml # do some modification
 # run training
 python main.py train configs/train.yaml.template
 
-# run testing
-python main.py test configs/train.yaml {your_ckpt_path} {your_hparams_path}
+# run testing with two gpus
+python main.py test configs/train.yaml {your_ckpt_path} {your_hparams_path} --gpus 2 --accelerator ddp
 ```
 
 ### Citation   
